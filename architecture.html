@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Diagnosis System - Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #581c87 50%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #60a5fa, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+        }
+
+        .diagram-container {
+            position: relative;
+            background: rgba(59, 130, 246, 0.05);
+            backdrop-filter: blur(60px);
+            border-radius: 2rem;
+            padding: 2rem;
+        }
+
+        .layer {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(34, 211, 238, 0.2));
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .layer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 60px rgba(59, 130, 246, 0.4);
+        }
+
+        .layer.purple {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2));
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .layer.emerald {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(20, 184, 166, 0.2));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .layer.orange {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.2));
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .layer.rose {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(236, 72, 153, 0.2));
+            border-color: rgba(244, 63, 94, 0.3);
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon-box.blue { background: #3b82f6; }
+        .icon-box.purple { background: #a855f7; }
+        .icon-box.emerald {
+            background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .icon-box.orange { background: #f97316; }
+        .icon-box.rose { background: #f43f5e; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .layer-title {
+            margin-left: 1.5rem;
+        }
+
+        .layer-title h2 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .layer-title p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .card ul {
+            margin-top: 0.75rem;
+            list-style: none;
+        }
+
+        .card li {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .arrow-line {
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to bottom, #3b82f6, #a855f7);
+            position: relative;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 16px;
+            height: 16px;
+            background: #a855f7;
+        }
+
+        .ml-pipeline {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            margin-top: 1.5rem;
+        }
+
+        .ml-pipeline h4 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .pipeline-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pipeline-step {
+            flex: 1;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .pipeline-step-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-step-desc {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .arrow-right {
+            color: #10b981;
+            font-size: 1.5rem;
+        }
+
+        .tech-stack {
+            margin-top: 3rem;
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5), rgba(51, 65, 85, 0.5));
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+        }
+
+        .tech-stack h3 {
+            text-align: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .tech-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .tech-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-name {
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stats {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(34, 211, 238, 0.2));
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .stat-card.emerald {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(20, 184, 166, 0.2));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2));
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.2));
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .stat-card.blue .stat-value { color: #60a5fa; }
+        .stat-card.emerald .stat-value { color: #10b981; }
+        .stat-card.purple .stat-value { color: #a855f7; }
+        .stat-card.orange .stat-value { color: #f97316; }
+
+        .stat-label {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .stat-card.blue .stat-label { color: #93c5fd; }
+        .stat-card.emerald .stat-label { color: #6ee7b7; }
+        .stat-card.purple .stat-label { color: #c084fc; }
+        .stat-card.orange .stat-label { color: #fdba74; }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .subtitle { font-size: 1rem; }
+            .layer-title h2 { font-size: 1.5rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">System Architecture</h1>
+            <p class="subtitle">ML-Powered Medical Diagnosis Platform</p>
+        </div>
+
+        <div class="diagram-container">
+
+            <!-- LAYER 1: PRESENTATION -->
+            <div class="layer">
+                <div class="layer-header">
+                    <div class="icon-box blue">🌐</div>
+                    <div class="layer-title">
+                        <h2>Presentation Layer</h2>
+                        <p style="color: #93c5fd;">Responsive React Interface</p>
+                    </div>
+                </div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">📊</div>
+                        <h3>Dashboard</h3>
+                        <p style="color: #93c5fd;">Interactive health overview</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📈</div>
+                        <h3>Visualizations</h3>
+                        <p style="color: #67e8f9;">Dynamic chart rendering</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">✅</div>
+                        <h3>Results Display</h3>
+                        <p style="color: #86efac;">Real-time diagnostics</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📋</div>
+                        <h3>Recommendations</h3>
+                        <p style="color: #c084fc;">Personalized guidance</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">
+                <div class="arrow-line"></div>
+            </div>
+
+            <!-- LAYER 2: APPLICATION -->
+            <div class="layer purple">
+                <div class="layer-header">
+                    <div class="icon-box purple">⚙️</div>
+                    <div class="layer-title">
+                        <h2>Application Layer</h2>
+                        <p style="color: #c084fc;">Business Logic & State Management</p>
+                    </div>
+                </div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">📦</div>
+                        <h3>React Components</h3>
+                        <p style="color: #c084fc;">Modular UI building blocks</p>
+                        <ul>
+                            <li>• HealthChart</li>
+                            <li>• DiagnosisResult</li>
+                            <li>• ParameterInput</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🔄</div>
+                        <h3>State Manager</h3>
+                        <p style="color: #ec4899;">React Hooks & Context</p>
+                        <ul>
+                            <li>• useState</li>
+                            <li>• useEffect</li>
+                            <li>• Custom Hooks</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📘</div>
+                        <h3>Type System</h3>
+                        <p style="color: #818cf8;">TypeScript definitions</p>
+                        <ul>
+                            <li>• HealthParameter</li>
+                            <li>• DiagnosisStatus</li>
+                            <li>• CategoryData</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">
+                <div class="arrow-line" style="background: linear-gradient(to bottom, #a855f7, #10b981);"></div>
+            </div>
+
+            <!-- LAYER 3: ML ENGINE -->
+            <div class="layer emerald">
+                <div class="layer-header">
+                    <div class="icon-box emerald">🧠</div>
+                    <div class="layer-title">
+                        <h2>ML Intelligence Core</h2>
+                        <p style="color: #6ee7b7;">Advanced Machine Learning Engine</p>
+                    </div>
+                </div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">⚡</div>
+                        <h3>Pattern Recognition</h3>
+                        <p style="color: #fde047;">Neural network analysis</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📊</div>
+                        <h3>Risk Prediction</h3>
+                        <p style="color: #5eead4;">Probabilistic modeling</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🎯</div>
+                        <h3>Classification</h3>
+                        <p style="color: #6ee7b7;">Multi-class diagnosis</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🤖</div>
+                        <h3>Recommendations</h3>
+                        <p style="color: #67e8f9;">Context-aware AI</p>
+                    </div>
+                </div>
+
+                <div class="ml-pipeline">
+                    <h4>🧠 ML Algorithm Pipeline</h4>
+                    <div class="pipeline-steps">
+                        <div class="pipeline-step">
+                            <div class="pipeline-step-title" style="color: #6ee7b7;">Input Validation</div>
+                            <div class="pipeline-step-desc" style="color: #94a3b8;">Parameter check</div>
+                        </div>
+                        <div class="arrow-right">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-step-title" style="color: #5eead4;">Threshold Analysis</div>
+                            <div class="pipeline-step-desc" style="color: #94a3b8;">Range evaluation</div>
+                        </div>
+                        <div class="arrow-right">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-step-title" style="color: #67e8f9;">Risk Aggregation</div>
+                            <div class="pipeline-step-desc" style="color: #94a3b8;">Multi-parameter</div>
+                        </div>
+                        <div class="arrow-right">→</div>
+                        <div class="pipeline-step">
+                            <div class="pipeline-step-title" style="color: #60a5fa;">Output Generation</div>
+                            <div class="pipeline-step-desc" style="color: #94a3b8;">Recommendations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">
+                <div class="arrow-line" style="background: linear-gradient(to bottom, #10b981, #f97316);"></div>
+            </div>
+
+            <!-- LAYER 4: DATA -->
+            <div class="layer orange">
+                <div class="layer-header">
+                    <div class="icon-box orange">💾</div>
+                    <div class="layer-title">
+                        <h2>Data Layer</h2>
+                        <p style="color: #fdba74;">Medical Knowledge Base & Parameters</p>
+                    </div>
+                </div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">🩺</div>
+                        <h3>Diabetes</h3>
+                        <p style="color: #fdba74;">4 parameters</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">❤️</div>
+                        <h3>Heart</h3>
+                        <p style="color: #fdba74;">4 parameters</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🫁</div>
+                        <h3>Thorax</h3>
+                        <p style="color: #fdba74;">3 parameters</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🔬</div>
+                        <h3>Liver</h3>
+                        <p style="color: #fdba74;">4 parameters</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🩸</div>
+                        <h3>+6 More</h3>
+                        <p style="color: #fdba74;">35+ parameters</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">
+                <div class="arrow-line" style="background: linear-gradient(to bottom, #f97316, #f43f5e);"></div>
+            </div>
+
+            <!-- LAYER 5: SECURITY -->
+            <div class="layer rose">
+                <div class="layer-header">
+                    <div class="icon-box rose">🔒</div>
+                    <div class="layer-title">
+                        <h2>Security & Compliance</h2>
+                        <p style="color: #fda4af;">Enterprise-Grade Protection</p>
+                    </div>
+                </div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-icon">🛡️</div>
+                        <h3>HIPAA Compliant</h3>
+                        <p style="color: #fda4af;">Healthcare data protection</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">💻</div>
+                        <h3>Client-Side Processing</h3>
+                        <p style="color: #f9a8d4;">No data transmission</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">🔐</div>
+                        <h3>Privacy First</h3>
+                        <p style="color: #fca5a5;">Zero data collection</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TECH STACK -->
+        <div class="tech-stack">
+            <h3>Technology Stack</h3>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">⚛️</div>
+                    <div class="tech-name">React 18</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📘</div>
+                    <div class="tech-name">TypeScript</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">⚡</div>
+                    <div class="tech-name">Vite</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🎨</div>
+                    <div class="tech-name">Tailwind</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📊</div>
+                    <div class="tech-name">Recharts</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🎭</div>
+                    <div class="tech-name">Framer</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🔒</div>
+                    <div class="tech-name">HIPAA</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🧠</div>
+                    <div class="tech-name">ML Core</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats">
+            <div class="stat-card blue">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Disease Categories</div>
+            </div>
+            <div class="stat-card emerald">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Health Parameters</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-value">95.3%</div>
+                <div class="stat-label">ML Accuracy</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">HIPAA Compliant</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
