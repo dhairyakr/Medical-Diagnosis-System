@@ -278,7 +278,7 @@ interface DiagnosisEngine {
 ## 🎯 ML Model Performance
 
 ### Accuracy Metrics
-- **Overall Diagnostic Accuracy**: 87.3%
+- **Overall Diagnostic Accuracy**: 95.3%
 - **False Positive Rate**: 2.1%
 - **False Negative Rate**: 2.6%
 - **Sensitivity**: 97.4%
