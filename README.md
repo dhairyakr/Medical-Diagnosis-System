@@ -99,9 +99,8 @@ The project includes the following design artifacts:
 
 ## 👥 Team
 
-<!-- Add your team members here -->
-- Name 1
-- Name 2
+- Dhairya (@dhairyakr)
+- K. Nikilesh Reddy (@nikileshreddykoduru)
 
 ## 📄 License
 
